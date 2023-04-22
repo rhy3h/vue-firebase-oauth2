@@ -1,12 +1,37 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/sign-up">Sign Up</router-link> |
-    <router-link to="/sign-in">Sign In</router-link> |
-    <router-link to="/admin">Admin</router-link>
+    <template v-if="!isLoggedIn">
+      <router-link to="/sign-in">Sign In</router-link> |
+    </template>
+    <router-link to="/admin">Admin</router-link> |
+    <template v-if="isLoggedIn">
+      <button @click="handleSignOut">Sign Out</button>
+    </template>
   </nav>
   <router-view />
 </template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import router from "./router";
+
+const isLoggedIn = ref(false);
+const auth = getAuth();
+onAuthStateChanged(auth, (user) => {
+  isLoggedIn.value = !!user;
+  if (user) {
+    router.push("/");
+  }
+});
+
+const handleSignOut = () => {
+  signOut(auth).then(() => {
+    router.push("/");
+  });
+};
+</script>
 
 <style lang="scss">
 #app {

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import HomeView from "../views/HomeView.vue";
 
 const routes: Array<RouteRecordRaw> = [
@@ -12,6 +13,9 @@ const routes: Array<RouteRecordRaw> = [
     name: "admin",
     component: () =>
       import(/* webpackChunkName: "admin" */ "../views/AdminView.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/sign-up",
@@ -30,6 +34,34 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const removeListener = onAuthStateChanged(
+      getAuth(),
+      (user) => {
+        removeListener();
+        resolve(user);
+      },
+      reject
+    );
+  });
+};
+
+router.beforeEach(async (to, from, next) => {
+  if (!to.matched.some((record) => record.meta.requiresAuth)) {
+    next();
+    return;
+  }
+
+  if (await getCurrentUser()) {
+    next();
+    return;
+  }
+
+  alert("You don't have access!");
+  next("/sign-in");
 });
 
 export default router;
