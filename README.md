@@ -1,4 +1,4 @@
-# vue-firebase-oauth2
+# [Vue Firebase Oauth2](https://vue-firebase-oauth2.vercel.app/)
 
 ## Project setup
 ```
